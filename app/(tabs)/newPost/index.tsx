@@ -3,11 +3,11 @@ import FontAwesome5 from "@expo/vector-icons/FontAwesome5";
 import React, { useContext, useEffect, useState } from "react";
 import { Button, TextInput } from "react-native-paper";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
-import ModalCamera from "@/components/ModalCamera";
 import { Image } from "expo-image";
 import * as Location from "expo-location";
 import { DataContext } from "@/context/dataContext/DataContext";
 import MapView, { Marker } from "react-native-maps";
+import ModalCamera from "@/components/ModalCamera";
 
 export default function NewPost() {
   const { newPost } = useContext(DataContext);

@@ -8,7 +8,7 @@ export default function Index() {
       <Text style={styles.title}>Bienvenido a Instagram</Text>
 
       <Image
-        source={require("../assets/images/logo-instagram-color.png")} // Usar require para imágenes locales
+        source={require("../assets/images/favicon.png")} // Usar require para imágenes locales
         style={styles.image}
       />
 
