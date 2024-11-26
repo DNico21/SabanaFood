@@ -10,10 +10,9 @@ export default function HomeLayout() {
     >
       <Stack.Screen name="index"
         options={{
-          title: "Instagram",
+          title: "Inicio",
           headerRight: () => (
             <View style={{ flexDirection: 'row' }}>
-              
               <Link href="/(tabs)/home/notifications" asChild>
                 <TouchableOpacity style={{ marginRight: 10 }}>
                   <Feather name="bell" size={30} color="black" />

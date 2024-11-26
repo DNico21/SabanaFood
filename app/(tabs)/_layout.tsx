@@ -1,8 +1,6 @@
 import React from "react";
 import { Tabs } from "expo-router";
 import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
-import MaterialIcons from "@expo/vector-icons/MaterialIcons";
-import FontAwesome from "@expo/vector-icons/FontAwesome";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import { DataContext, DataProvider } from "@/context/dataContext/DataContext";
@@ -30,29 +28,11 @@ export default function _layout() {
           }}
         />
         <Tabs.Screen
-          name="search"
+          name="Domicilio"
           options={{
-            title: "Buscar",
-            tabBarIcon: ({ color }) => (
-              <FontAwesome name="search" size={24} color="black" />
-            ),
-          }}
-        />
-        <Tabs.Screen
-          name="newPost"
-          options={{
-            title: "Nuevo Post",
+            title: "domicilio",
             tabBarIcon: ({ color }) => (
               <FontAwesome6 name="circle-plus" size={24} color="black" />
-            ),
-          }}
-        />
-        <Tabs.Screen
-          name="reels"
-          options={{
-            title: "Reels",
-            tabBarIcon: ({ color }) => (
-              <MaterialIcons name="movie" size={24} color="black" />
             ),
           }}
         />

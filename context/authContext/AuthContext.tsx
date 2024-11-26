@@ -21,8 +21,7 @@ interface AuthContextProps {
   signUp: (
     email: string,
     password: string,
-    firstname: string,
-    lastname: string
+    username: string,
   ) => Promise<boolean>;
   signIn: (email: string, password: string) => Promise<boolean>;
   updateUser: (updatedUser: any) => void;
@@ -98,8 +97,7 @@ export function AuthProvider({ children }: any) {
   const signUp = async (
     email: string,
     password: string,
-    firstname: string,
-    lastname: string
+    username: string,
   ): Promise<boolean> => {
     try {
       const response = await createUserWithEmailAndPassword(
@@ -112,13 +110,12 @@ export function AuthProvider({ children }: any) {
 
       // Guardar los datos adicionales del usuario en Firestore
       await setDoc(doc(db, "Users", uid), {
-        firstname,
-        lastname,
+        username,
         email,
       });
 
       // Almacenar los datos del usuario en el estado
-      dispatch({ type: "login", payload: { uid, email, firstname, lastname } });
+      dispatch({ type: "login", payload: { uid, email, username } });
 
       return true;
     } catch (error: any) {

@@ -5,31 +5,29 @@ import { Link } from "expo-router";
 export default function Index() {
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Bienvenido a Instagram</Text>
+      <Text style={styles.title}>Bienvenido a SabanaFood</Text>
 
       <Image
-        source={require("../assets/images/favicon.png")} // Usar require para imágenes locales
+        source={require("../assets/images/Unisabana.png")} // Usar require para imágenes locales
         style={styles.image}
       />
 
       {/* Contenedor para el botón de Iniciar Sesión */}
       <View style={styles.buttonContainer}>
         <Link href={"/singin"} asChild>
-          <Button title="Iniciar Sesión" color="#3897f0" />
+          <Button title="Iniciar Sesión" color="#042464" />
         </Link>
       </View>
 
       {/* Contenedor para el botón de Registrarse */}
       <View style={styles.buttonContainer}>
         <Link href={"/singup"} asChild>
-          <Button title="Registrarse" color="#3897f0" />
+          <Button title="Registrarse" color="#042464" />
         </Link>
       </View>
     </View>
   );
 }
-
-
 
 const styles = StyleSheet.create({
   container: {
@@ -41,23 +39,21 @@ const styles = StyleSheet.create({
     backgroundColor: "#f9f9f9",
   },
   title: {
-    fontSize: 24,
+    fontSize: 40,
     fontWeight: "bold",
-    color: "#333",
+    color: "#0",
     marginBottom: 40,
     fontFamily: "Pacifico",
   },
   buttonContainer: {
     marginTop: 20,
-    width: "80%",
+    width: "100%",
     height: 50,
-    borderRadius: 30,
+    borderRadius: 100,
   },
   image: {
-    width: 150, // Ancho de la imagen
-    height: 150, // Alto de la imagen
+    width: 400, // Ancho de la imagen
+    height: 400, // Alto de la imagen
     marginBottom: 50, // Espacio entre la imagen y el título
   },
 });
-
-

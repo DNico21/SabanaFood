@@ -9,8 +9,7 @@ export default function SignUp() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [firstname, setFirstname] = useState("");
-  const [lastname, setLastname] = useState("");
+  const [username, setUsername] = useState("");
 
   const handleSignUp = async () => {
 
@@ -26,7 +25,7 @@ export default function SignUp() {
       return;
     }
 
-    const response = await signUp(email, password, firstname, lastname);
+    const response = await signUp(email, password, username);
     if (response) {
       Alert.alert("Éxito", "Cuenta creada con éxito");
 
@@ -52,7 +51,7 @@ export default function SignUp() {
       <View style={styles.inputContainer}>
         <TextInput
           autoCapitalize="none"
-          placeholder="Email"
+          placeholder="correo institucional"
           style={styles.input}
           value={email}
           onChangeText={setEmail} // Actualiza el estado con el valor de email
@@ -63,23 +62,13 @@ export default function SignUp() {
       <View style={styles.inputContainer}>
         <TextInput
           autoCapitalize="none"
-          placeholder="Nombre"
+          placeholder="Nombre de usuario"
           style={styles.input}
-          value={firstname}
-          onChangeText={setFirstname} // Actualiza el estado con el valor de email
+          value={username}
+          onChangeText={setUsername} // Actualiza el estado con el valor de email
         />
       </View>
 
-      {/* Campo de Nombre */}
-      <View style={styles.inputContainer}>
-        <TextInput
-          autoCapitalize="none"
-          placeholder="Apellido"
-          style={styles.input}
-          value={lastname}
-          onChangeText={setLastname} // Actualiza el estado con el valor de email
-        />
-      </View>
 
       {/* Campo de Contraseña */}
       <View style={styles.inputContainer}>
@@ -107,7 +96,7 @@ export default function SignUp() {
 
       {/* Botón de Registro */}
       <View style={styles.buttonContainer}>
-        <Button title="Registrar" onPress={handleSignUp} />
+        <Button title="Registrar" color="#042464" onPress={handleSignUp} />
       </View>
 
       {/* Enlace a la página de inicio de sesión */}

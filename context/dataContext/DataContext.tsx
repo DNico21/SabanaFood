@@ -1,70 +1,106 @@
-//DataContext.tsx
-import { createContext, useContext, useEffect, useReducer, useState } from "react";
-import { dataReducer } from "./DataReducer";
+import React, { createContext, useContext, useEffect, useReducer } from "react";
 import {
   getDownloadURL,
   getStorage,
   ref,
   uploadBytes,
 } from "firebase/storage";
+import {
+  addDoc,
+  collection,
+  getDocs,
+  onSnapshot,
+  query,
+  serverTimestamp,
+  where,
+} from "firebase/firestore";
 import { DefaultResponse, PostProps } from "@/interfaces/postInterface";
-import { addDoc, collection, getDocs, onSnapshot, serverTimestamp } from "firebase/firestore";
 import { db } from "@/utils/firebaseConfig";
 import { AuthContext } from "../authContext/AuthContext";
+import { dataReducer } from "./DataReducer";
+
+export interface MessageProps {
+  id?: string;
+  text: string;
+  senderId: string;
+  senderName: string;
+  timestamp: Date | string;
+}
 
 export interface DataState {
-  messages: any[]; // Estado para mensajes del chat
+  posts: PostProps[]; // Publicaciones asociadas
+  messages: MessageProps[]; // Mensajes del chat con estructura definida
 }
 
 const dataStateDefault: DataState = {
+  posts: [],
   messages: [],
 };
 
 interface DataContextProps {
   state: DataState;
   newPost: (newPost: PostProps) => Promise<DefaultResponse>;
-  getPosts: () => Promise<PostProps[]>;
-  sendMessage: (text: string) => Promise<void>; // Nueva función para enviar mensajes
+  getPosts: (restaurantId: string) => Promise<PostProps[]>;
+  sendMessage: (text: string) => Promise<void>;
 }
 
 export const DataContext = createContext({} as DataContextProps);
 
 export function DataProvider({ children }: any) {
   const [state, dispatch] = useReducer(dataReducer, dataStateDefault);
-  const [messages, setMessages] = useState<any[]>([]); // Nuevo estado para mensajes
   const {
     state: { user },
   } = useContext(AuthContext);
 
   useEffect(() => {
-    if (!user) return;
-    const unsubscribe = openListener(); // Escuchar los mensajes en tiempo real
-    return () => unsubscribe && unsubscribe();
+    if (!user) {
+      console.error("Usuario no autenticado. No se configuran listeners.");
+      return;
+    }
+    const unsubscribeMessages = openMessageListener();
+    // Nota: `restaurantId` debe ser proporcionado en el listener para publicaciones específicas.
+    return () => {
+      unsubscribeMessages();
+    };
   }, [user]);
 
   // Función para escuchar mensajes en tiempo real
-  const openListener = () => {
+  const openMessageListener = () => {
     const messagesRef = collection(db, "messages");
-    const unsubscribe = onSnapshot(
+    return onSnapshot(
       messagesRef,
       (snapshot) => {
-        const newMessages = snapshot.docs.map((doc) => ({
+        const messages = snapshot.docs.map((doc) => ({
           id: doc.id,
           ...doc.data(),
         }));
-        setMessages(newMessages);
+        dispatch({ type: "SET_MESSAGES", payload: messages });
       },
-      (error) => {
-        console.error("Error fetching messages:", error);
-      }
+      (error) => console.error("Error fetching messages:", error)
     );
+  };
 
-    return unsubscribe;
+  // Función para escuchar publicaciones en tiempo real para un restaurante específico
+  const openPostListener = (restaurantId: string) => {
+    if (!restaurantId) return () => {};
+    const postsRef = collection(db, "posts");
+    const queryRef = query(postsRef, where("restaurantId", "==", restaurantId));
+    return onSnapshot(
+      queryRef,
+      (snapshot) => {
+        const posts = snapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        }));
+        dispatch({ type: "SET_POSTS", payload: posts });
+      },
+      (error) => console.error("Error fetching posts:", error)
+    );
   };
 
   // Función para enviar un nuevo mensaje
   const sendMessage = async (text: string) => {
-    if (!user) return;
+    if (!user) throw new Error("Usuario no autenticado");
 
     try {
       const messagesRef = collection(db, "messages");
@@ -75,71 +111,78 @@ export function DataProvider({ children }: any) {
         timestamp: serverTimestamp(),
       });
     } catch (error) {
-      console.error("Error sending message:", error);
+      console.error("Error enviando mensaje:", error);
+      throw error;
     }
   };
 
-  const uploadImage = async (uri: string) => {
+  // Subir imágenes a Firebase Storage
+  const uploadImage = async (uri: string): Promise<string> => {
+    if (!uri) {
+      // Retorna una URL predeterminada o un string vacío si no hay imagen
+      return "";
+    }
+  
     const storage = getStorage();
-    const storageRef = ref(storage, "posts");
-
+    const uniqueName = `posts/${Date.now()}-${Math.random().toString(36).substring(7)}`;
+    const storageRef = ref(storage, uniqueName);
+  
     try {
       const response = await fetch(uri);
       const blob = await response.blob();
-      const snapshot = await uploadBytes(storageRef, blob);
-      const url = await getDownloadURL(storageRef);
-
-      return url;
+      await uploadBytes(storageRef, blob);
+      return await getDownloadURL(storageRef);
     } catch (error) {
-      console.log(error);
-      return "";
+      console.error("Error subiendo imagen:", error);
+      throw error;
     }
   };
 
-  const getPosts = async (): Promise<PostProps[]> => {
+  // Obtener publicaciones de un restaurante
+  const getPosts = async (restaurantId: string): Promise<PostProps[]> => {
     try {
       const postsRef = collection(db, "posts");
-      const snapshot = await getDocs(postsRef);
-      const posts = snapshot.docs.map((doc) => doc.data() as PostProps);
-      return posts;
+      const queryRef = query(postsRef, where("restaurantId", "==", restaurantId));
+      const snapshot = await getDocs(queryRef); // Filtrar publicaciones desde Firebase
+      return snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() } as PostProps));
     } catch (error) {
-      console.log("Error obteniendo posts: ", error);
+      console.error("Error obteniendo publicaciones:", error);
       return [];
     }
   };
 
+  // Crear una nueva publicación
   const newPost = async (newPost: PostProps): Promise<DefaultResponse> => {
+    if (!user) return { isSuccess: false, message: "Usuario no autenticado" };
+  
     try {
-      const urlImage = await uploadImage(newPost.image);
-      const docRef = await addDoc(collection(db, "posts"), {
+      // Subir imagen solo si el campo `image` no está vacío
+      const urlImage = newPost.image ? await uploadImage(newPost.image) : "";
+  
+      await addDoc(collection(db, "posts"), {
         ...newPost,
         image: urlImage,
-        date: new Date(),
+        date: serverTimestamp(),
         username: `${user.firstname} ${user.lastname}`,
         postedBy: user.uid,
         likes: 0,
+        restaurantId: newPost.restaurantId, // Asociar con el restaurante
       });
-
-      return {
-        isSuccess: true,
-        message: "Creado con éxito",
-      };
+  
+      return { isSuccess: true, message: "Publicación creada con éxito" };
     } catch (error) {
-      console.log(error);
-      return {
-        isSuccess: false,
-        message: "Hubo un error: " + error,
-      };
+      console.error("Error creando publicación:", error);
+      return { isSuccess: false, message: `Error creando publicación: ${error}` };
     }
   };
 
   return (
     <DataContext.Provider
       value={{
-        state: { ...state, messages },
+        state,
         newPost,
         getPosts,
-        sendMessage, // Proveer la función de enviar mensaje
+        sendMessage,
       }}
     >
       {children}

@@ -1,79 +1,92 @@
-import React, { useEffect, useState, useContext } from 'react';
-import { View, Text, FlatList, Image, StyleSheet } from 'react-native';
-import { DataContext } from '@/context/dataContext/DataContext';
-import { PostProps } from '@/interfaces/postInterface';
+import { useRouter } from "expo-router";
+import React from "react";
+import {
+  View,
+  Image,
+  StyleSheet,
+  TouchableOpacity,
+  ScrollView,
+} from "react-native";
 
 export default function HomePage() {
-  const { getPosts } = useContext(DataContext);
-  const [posts, setPosts] = useState<PostProps[]>([]);
+  const router = useRouter();
 
-  useEffect(() => {
-    const fetchPosts = async () => {
-      const data = await getPosts();
-      setPosts(data);
-    };
-
-    fetchPosts();
-  }, []);
-
-  const renderPost = ({ item }: { item: PostProps }) => (
-    <View style={styles.postContainer}>    
-      <Text style={styles.postUsername}>Publicado por: {item.username}</Text>
-      <Text style={styles.postAddress}>Ubicación: {item.address}</Text>
-      <Image source={{ uri: item.image }} style={styles.postImage} />
-      <Text style={styles.postDescription}>{item.description}</Text>
-    </View>
-  );
+  const handlePress = (id: string) => {
+    router.push(`/home/detail/${id}`); // Navega a la página de la imagen con el ID
+  };
 
   return (
-    <View style={styles.container}>
-      {posts.length > 0 ? (
-        <FlatList
-          data={posts}
-          renderItem={renderPost}
-          keyExtractor={(item, index) => index.toString()}
-        />
-      ) : (
-        <Text style={styles.noPostsText}>No hay publicaciones aún</Text>
-      )}
-    </View>
+    <ScrollView contentContainerStyle={styles.scrollContainer}>
+      <View style={styles.container}>
+        {/* Botón con Imagen 1 */}
+        <TouchableOpacity onPress={() => handlePress("1")}>
+          <Image
+            source={require("@/assets/images/MenuArcos.jpg")}
+            style={styles.image}
+          />
+        </TouchableOpacity>
+
+        {/* Botón con Imagen 2 */}
+        <TouchableOpacity onPress={() => handlePress("2")}>
+          <Image
+            source={require("@/assets/images/MenuEmbarca.jpg")}
+            style={styles.image}
+          />
+        </TouchableOpacity>
+
+        {/* Botón con Imagen 3 */}
+        <TouchableOpacity onPress={() => handlePress("3")}>
+          <Image
+            source={require("@/assets/images/MenuCipreses.jpg")}
+            style={styles.image}
+          />
+        </TouchableOpacity>
+
+        {/* Botón con Imagen 4 */}
+        <TouchableOpacity onPress={() => handlePress("4")}>
+          <Image
+            source={require("@/assets/images/MenuEscuela.jpg")}
+            style={styles.image}
+          />
+        </TouchableOpacity>
+
+        {/* Botón con Imagen 5 */}
+        <TouchableOpacity onPress={() => handlePress("5")}>
+          <Image
+            source={require("@/assets/images/MenuKioskos.jpg")}
+            style={styles.image}
+          />
+        </TouchableOpacity>
+
+        {/* Botón con Imagen 6 */}
+        <TouchableOpacity onPress={() => handlePress("6")}>
+          <Image
+            source={require("@/assets/images/MenuSanduche.jpg")}
+            style={styles.image}
+          />
+        </TouchableOpacity>
+      </View>
+    </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
+  scrollContainer: {
+    paddingVertical: 10, // Espaciado vertical entre los elementos y los bordes del contenedor
+  },
   container: {
     flex: 1,
-    padding: 20,
+    flexDirection: "column",
+    justifyContent: "space-around",
+    alignItems: "center",
   },
-  postContainer: {
-    marginBottom: 20,
-    borderWidth: 1,
-    borderColor: '#ccc',
+
+  image: {
+    width: 360,
+    height: 110,
+    margin: 10,
     borderRadius: 10,
-    padding: 10,
-  },
-  postImage: {
-    width: '100%',
-    height: 200,
-    borderRadius: 10,
-  },
-  postDescription: {
-    marginTop: 10,
-    fontSize: 16,
-  },
-  postUsername: {
-    marginTop: 5,
-    fontSize: 14,
-    color: 'gray',
-  },
-  postAddress: {
-    marginTop: 5,
-    fontSize: 12,
-    color: 'gray',
-  },
-  noPostsText: {
-    fontSize: 18,
-    textAlign: 'center',
-    marginTop: 20,
+    borderColor: "black",
+    borderWidth: 2,
   },
 });

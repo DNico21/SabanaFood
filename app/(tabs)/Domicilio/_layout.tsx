@@ -5,7 +5,7 @@ export default function NewPostLayout() {
     >
       <Stack.Screen name="index"
         options={{
-          title: "Instagram",
+          title: "Domicilio",
         }}
       />
     </Stack>

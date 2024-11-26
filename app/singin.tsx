@@ -28,7 +28,7 @@ export default function SignIn() {
 
             <View style={styles.inputContainer}>
                 <TextInput
-                    placeholder="Email"
+                    placeholder="correo institucional"
                     style={styles.input}
                     value={email}
                     onChangeText={setEmail} // Aquí usamos el estado
@@ -46,7 +46,7 @@ export default function SignIn() {
             </View>
 
             <View style={styles.buttonContainer}>
-                <Button title="Ingresar" onPress={handleLogin} />
+                <Button title="Ingresar" onPress={handleLogin} color="#042464" />
             </View>
 
             <View style={styles.linkContainer}>
