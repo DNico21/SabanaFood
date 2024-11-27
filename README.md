@@ -54,20 +54,35 @@ import geminiService from './services/GeminiApiServiceHelper';
 
 ├── src/
 │   ├── services/
+
 │   │   ├── GeminiApiServiceHelper.ts  // Servicio para la API de Gemini
+
 │   │   ├── Domicilio.ts           // Lógica de pedidos a domicilio
+
 │   │   └── Home.ts          // Lógica para reseñas de comida
+
 │   ├── components/
+
 │   │   ├── FoodList.tsx              // Lista de alimentos
+
 │   │   ├── FoodDetail.tsx            // Detalles de alimentos
+
 │   │   ├── RestaurantList.tsx        // Lista de restaurantes cercanos
+
 │   │   └── ReviewSection.tsx         // Sección para escribir y ver reseñas
+
 │   ├── utils/
+
 │   │   └── helpers.ts                // Funciones auxiliares
+
 │   └── App.tsx                       // Entrada principal de la app
+
 ├── package.json
+
 ├── README.md
+
 └── .env                              // Archivo para la clave de API
+
 Contribuciones
 ¡Las contribuciones son bienvenidas! Sigue estos pasos:
 
