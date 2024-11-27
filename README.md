@@ -25,30 +25,29 @@ Sigue estos pasos para clonar y configurar el proyecto:
 
 Clona el repositorio:
 
-bash
+bash:
 Copy code
-git clone https://github.com/username/repo-name.git
-cd repo-name
+git clone [https://github.com/username/repo-name.git](https://github.com/DNico21/SabanaFood.git)
 Instala las dependencias:
 
-bash
+bash:
 Copy code
 npm install
 Crea un archivo .env en la raíz del proyecto con tu clave de API de Gemini:
 
-env
+env:
 Copy code
 GEMINI_API_KEY=your-api-key
 Inicia el servidor local:
 
-bash
+bash:
 Copy code
 npm start
 Uso
 1. Consultar Información de Alimentos
 Realiza preguntas personalizadas sobre alimentos.
 
-typescript
+typescript:
 Copy code
 import geminiService from './services/GeminiApiServiceHelper';
 
@@ -111,8 +110,8 @@ Copy code
 ├── src/
 │   ├── services/
 │   │   ├── GeminiApiServiceHelper.ts  // Servicio para la API de Gemini
-│   │   ├── OrderService.ts           // Lógica de pedidos a domicilio
-│   │   └── ReviewService.ts          // Lógica para reseñas de comida
+│   │   ├── Domicilio.ts           // Lógica de pedidos a domicilio
+│   │   └── Home.ts          // Lógica para reseñas de comida
 │   ├── components/
 │   │   ├── FoodList.tsx              // Lista de alimentos
 │   │   ├── FoodDetail.tsx            // Detalles de alimentos
@@ -141,8 +140,8 @@ bash
 Copy code
 git push origin feature/nueva-funcionalidad
 Abre un Pull Request.
-Licencia
-Este proyecto está bajo la licencia MIT. Consulta el archivo LICENSE para más detalles.
+
+
 ## Figma:
 ### https://www.figma.com/design/EImZf5Q8R3UWPLhJ3uBYdH/Untitled?node-id=0-1&m=dev&t=VakZDAeLaHNCqEvq-1 
 ![image](https://github.com/user-attachments/assets/5af73d06-a073-47a5-bd96-28c3d8b3229e)
