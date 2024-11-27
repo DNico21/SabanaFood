@@ -9,6 +9,8 @@ export interface PostProps {
   username?: string;
   postedBy?: string;
   likes?: number;
+  items: any[];
+  paymentMethod: string;
 }
 
 export interface DefaultResponse {

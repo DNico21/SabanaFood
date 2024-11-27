@@ -163,7 +163,7 @@ export function DataProvider({ children }: any) {
         ...newPost,
         image: urlImage,
         date: serverTimestamp(),
-        username: `${user.firstname} ${user.lastname}`,
+        username: `${user.username}`,
         postedBy: user.uid,
         likes: 0,
         restaurantId: newPost.restaurantId, // Asociar con el restaurante

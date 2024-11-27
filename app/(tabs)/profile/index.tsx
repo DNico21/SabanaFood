@@ -1,248 +1,228 @@
-import React, { useEffect, useState, useCallback } from "react";
+import React, { useContext, useState } from "react";
 import {
   View,
   Text,
-  Image,
   StyleSheet,
   TouchableOpacity,
-  FlatList,
-  Modal,
+  TextInput,
+  Image,
+  ScrollView,
+  Alert,
 } from "react-native";
-import { Link, useFocusEffect } from "expo-router";
-import { collection, getDocs, query, where } from "firebase/firestore";
-import { auth, db } from "@/utils/firebaseConfig";
-import { useContext } from "react";
+import * as ImagePicker from "expo-image-picker";
 import { AuthContext } from "@/context/authContext/AuthContext";
-import { useRouter } from "expo-router"; // Importar el hook useRouter
-import { LinearGradient } from "expo-linear-gradient"; // Importar LinearGradient
 
 export default function Profile() {
-  const [posts, setPosts] = useState<string[]>([]);
-  const { state } = useContext(AuthContext);
-  const { firstname, lastname, profileImage } = state.user || {
+  const { state, updateUser } = useContext(AuthContext); // Función para actualizar el usuario
+  const { firstname, lastname, email, profileImage } = state.user || {
     firstname: "",
     lastname: "",
+    email: "",
     profileImage: "",
   };
 
-  const router = useRouter(); // Hook para la navegación
+  const [isEditing, setIsEditing] = useState(false);
+  const [formData, setFormData] = useState({
+    firstname,
+    lastname,
+    email,
+    profileImage,
+  });
 
-  // Estado para controlar la visibilidad del modal
-  const [isModalVisible, setModalVisible] = useState(false);
+  // Manejar cambios en el formulario
+  const handleInputChange = (field: string, value: string) => {
+    setFormData({ ...formData, [field]: value });
+  };
 
-  // Función para cargar los posts del usuario
-  const fetchUserPosts = async () => {
-    const user = auth.currentUser;
-    if (user) {
-      const q = query(
-        collection(db, "posts"),
-        where("postedBy", "==", user.uid)
-      );
-      const querySnapshot = await getDocs(q);
-      const userPosts = querySnapshot.docs.map((doc) => doc.data().image);
-      setPosts(userPosts);
+  // Seleccionar imagen desde la galería
+  const pickImage = async () => {
+    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (status !== "granted") {
+      Alert.alert("Permiso denegado", "Se necesita acceso a la galería.");
+      return;
+    }
+
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      quality: 1,
+    });
+
+    if (!result.canceled) {
+      setFormData({ ...formData, profileImage: result.assets[0].uri }); // Actualizar la imagen
     }
   };
 
-  useFocusEffect(
-    useCallback(() => {
-      fetchUserPosts(); // Cargar posts del usuario
-    }, [])
-  );
-
-  // Función para abrir el modal al hacer clic en la imagen de perfil
-  const handleProfileImagePress = () => {
-    setModalVisible(true);
+  // Guardar cambios
+  const handleSave = () => {
+    if (!formData.firstname || !formData.lastname || !formData.email) {
+      Alert.alert("Error", "Todos los campos son obligatorios.");
+      return;
+    }
+    updateUser(formData); // Actualiza los datos en el contexto
+    setIsEditing(false); // Salir del modo de edición
   };
-
-  // Función para cerrar el modal
-  const handleCloseModal = () => {
-    setModalVisible(false);
-  };
-
-  // Función para manejar clic en una publicación y redirigir a userPost
-  const handlePostImagePress = () => {
-    router.push("/(tabs)/profile/userPost");
-  };
-
-  const renderPostImage = ({ item }: { item: string }) => (
-    <TouchableOpacity onPress={handlePostImagePress}>
-      <Image source={{ uri: item }} style={styles.postImage} />
-    </TouchableOpacity>
-  );
 
   return (
-    <View style={styles.container}>
+    <ScrollView contentContainerStyle={styles.container}>
       <View style={styles.profileContainer}>
-        {/* Contenedor LinearGradient para la imagen de perfil */}
-        <TouchableOpacity onPress={handleProfileImagePress}>
-          <LinearGradient
-            colors={["#E012D0", "#E0D128"]} // Gradiente de colores (puedes personalizarlos)
-            style={styles.gradientContainer}
-          >
-            <Image
-              source={
-                profileImage
-                  ? { uri: profileImage }
-                  : require("@/assets/images/adaptive-icon.png")
-              } // Mostrar imagen de perfil del usuario
-              style={styles.profileImage}
-            />
-          </LinearGradient>
+        <TouchableOpacity onPress={pickImage}>
+          <Image
+            source={
+              formData.profileImage
+                ? { uri: formData.profileImage }
+                : require("@/assets/images/adaptive-icon.png")
+            }
+            style={styles.profileImage}
+          />
         </TouchableOpacity>
-
-        <View style={styles.textContainer}>
-          <Text style={styles.username}>{posts.length}</Text>
-          <Text style={styles.username}>Publicaciones</Text>
-        </View>
-
-        <View style={styles.textContainer}>
-          <Text style={styles.username}>##</Text>
-          <Text style={styles.username}>Seguidores</Text>
-        </View>
-
-        <View style={styles.textContainer}>
-          <Text style={styles.username}>##</Text>
-          <Text style={styles.username}>Seguidos</Text>
-        </View>
+        <Text style={styles.photoHint}>Toca la foto para cambiarla</Text>
       </View>
 
-      {/* Mostrar el nombre del usuario */}
-      <View style={styles.descrContainer}>
-        <Text>
-          {firstname} {lastname}
-        </Text>
-        <Text>Descripción</Text>
-      </View>
+      {/* Vista o edición de datos */}
+      {isEditing ? (
+        <View style={styles.editContainer}>
+          <Text style={styles.label}>Nombre</Text>
+          <TextInput
+            style={styles.input}
+            value={formData.firstname}
+            onChangeText={(value) => handleInputChange("firstname", value)}
+            placeholder="Nombre"
+          />
 
-      <View style={styles.buttonContainer}>
-        <Link href="/(tabs)/profile/editprofile" asChild>
-          <TouchableOpacity style={styles.button}>
-            <Text style={styles.buttonText}>Editar perfil</Text>
+          <Text style={styles.label}>Apellido</Text>
+          <TextInput
+            style={styles.input}
+            value={formData.lastname}
+            onChangeText={(value) => handleInputChange("lastname", value)}
+            placeholder="Apellido"
+          />
+
+          <Text style={styles.label}>Correo Electrónico</Text>
+          <TextInput
+            style={styles.input}
+            value={formData.email}
+            onChangeText={(value) => handleInputChange("email", value)}
+            placeholder="Correo Electrónico"
+            keyboardType="email-address"
+          />
+
+          {/* Botón para guardar cambios */}
+          <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
+            <Text style={styles.saveButtonText}>Guardar Cambios</Text>
           </TouchableOpacity>
-        </Link>
 
-        <Link href="/(tabs)/profile/configuration" asChild>
-          <TouchableOpacity style={styles.button}>
-            <Text style={styles.buttonText}>Ajustes</Text>
-          </TouchableOpacity>
-        </Link>
-      </View>
-
-      <View style={styles.publicacionesContainer}>
-        <FlatList
-          data={posts}
-          renderItem={renderPostImage}
-          keyExtractor={(item, index) => index.toString()}
-          numColumns={3} // Muestra 3 columnas
-        />
-      </View>
-
-      {/* Modal para mostrar la imagen de perfil en grande */}
-      <Modal
-        visible={isModalVisible}
-        transparent={true}
-        animationType="fade"
-        onRequestClose={handleCloseModal}
-      >
-        <View style={styles.modalContainer}>
-          <TouchableOpacity onPress={handleCloseModal}>
-            <Image
-              source={profileImage ? { uri: profileImage } : require("@/assets/images/adaptive-icon.png")}
-              style={styles.modalProfileImage}
-            />
+          {/* Botón para cancelar */}
+          <TouchableOpacity
+            style={styles.cancelButton}
+            onPress={() => setIsEditing(false)}
+          >
+            <Text style={styles.cancelButtonText}>Cancelar</Text>
           </TouchableOpacity>
         </View>
-      </Modal>
-    </View>
+      ) : (
+        <View style={styles.viewContainer}>
+          <Text style={styles.nameText}>
+            {firstname} {lastname}
+          </Text>
+          <Text style={styles.emailText}>{email}</Text>
+
+          <TouchableOpacity
+            style={styles.editButton}
+            onPress={() => setIsEditing(true)}
+          >
+            <Text style={styles.editButtonText}>Editar Perfil</Text>
+          </TouchableOpacity>
+        </View>
+      )}
+    </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
-    alignContent: "space-between",
-  },
-
-  profileContainer: {
-    flexDirection: "row", // Pone los elementos en fila
-    alignItems: "center",
-    margin: 15, // Alinea verticalmente en el centro
-  },
-
-  descrContainer: {
-    margin: 10,
-  },
-
-  profileImage: {
-    width: 80, // Ancho de la imagen
-    height: 80, // Alto de la imagen
-    borderRadius: 40, // Hace que la imagen sea circular
-    marginLeft: 5, // Espacio entre la imagen y el texto
-    borderColor: "#60FA1B",
-  },
-
-  gradientContainer: {
-    width: 90, // Tamaño del contenedor para que rodee la imagen de perfil
-    height: 90,
-    borderRadius: 45, // Hace que el contenedor también sea circular
-    alignItems: "flex-start",
-    justifyContent: "space-around",
-    marginRight: 20,
-  },
-
-  modalProfileImage: {
-    width: 300, // Tamaño de la imagen en el modal
-    height: 300,
-    borderRadius: 150, // Hace que la imagen sea circular en el modal
-  },
-
-  textContainer: {
+    flexGrow: 1,
     justifyContent: "center",
-    alignItems: "center", // Centra el texto y el número horizontalmente
+    alignItems: "center",
+    backgroundColor: "#fff",
+    padding: 20,
   },
-
-  username: {
-    alignContent: "center",
-    fontSize: 13,
+  profileContainer: {
+    alignItems: "center",
+    marginBottom: 20,
+  },
+  profileImage: {
+    width: 100,
+    height: 100,
+    borderRadius: 50,
+    marginBottom: 10,
+    borderWidth: 2,
+    borderColor: "#ccc",
+  },
+  photoHint: {
+    fontSize: 12,
+    color: "#888",
+    marginBottom: 20,
+  },
+  label: {
+    fontSize: 14,
     fontWeight: "bold",
-    margin: 4,
+    color: "#555",
+    marginBottom: 5,
   },
-
-  publicacionesContainer: {
-    alignContent: "space-between",
-    alignItems: "flex-start",
+  input: {
+    width: "100%",
+    borderColor: "#ccc",
+    borderWidth: 1,
+    borderRadius: 5,
+    padding: 10,
+    marginBottom: 15,
   },
-
-  buttonContainer: {
-    flexDirection: "row", // Pone los botones en fila
-    justifyContent: "space-around", // Espacio alrededor de los botones
-    marginVertical: 20,
+  nameText: {
+    fontSize: 18,
+    fontWeight: "bold",
+    marginBottom: 5,
   },
-
-  button: {
-    backgroundColor: "#2196F3", // Color del botón
+  emailText: {
+    fontSize: 16,
+    color: "#555",
+    marginBottom: 20,
+  },
+  editContainer: {
+    width: "100%",
+  },
+  viewContainer: {
+    alignItems: "center",
+  },
+  editButton: {
+    backgroundColor: "#2196F3",
     paddingVertical: 10,
     paddingHorizontal: 20,
-    borderRadius: 20, // Esquinas redondeadas
+    borderRadius: 5,
   },
-
-  buttonText: {
+  editButtonText: {
     color: "white",
-    fontWeight: "bold",
+    fontSize: 16,
   },
-
-  postImage: {
-    width: 131,
-    height: 131, // Ajusta según tus necesidades
-    margin: 0,
-    aspectRatio: 1 / 1,
+  saveButton: {
+    backgroundColor: "#4CAF50",
+    paddingVertical: 10,
+    borderRadius: 5,
+    marginBottom: 10,
   },
-
-  modalContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "rgba(0, 0, 0, 0.8)", // Fondo semitransparente para el modal
+  saveButtonText: {
+    color: "white",
+    fontSize: 16,
+    textAlign: "center",
+  },
+  cancelButton: {
+    backgroundColor: "#F44336",
+    paddingVertical: 10,
+    borderRadius: 5,
+  },
+  cancelButtonText: {
+    color: "white",
+    fontSize: 16,
+    textAlign: "center",
   },
 });
