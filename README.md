@@ -51,62 +51,7 @@ typescript:
 Copy code
 import geminiService from './services/GeminiApiServiceHelper';
 
-async function exampleUsage() {
-  try {
-    const response = await geminiService.sendMessageToGemini('¿Qué comida no tiene pepinillos?');
-    console.log('Respuesta:', response);
-  } catch (error) {
-    console.error('Error:', error);
-  }
-}
-exampleUsage();
-2. Realizar Pedidos a Domicilio
-Selecciona un restaurante cercano y realiza un pedido.
 
-typescript
-Copy code
-import { placeOrder } from './services/OrderService';
-
-async function orderFood() {
-  try {
-    const orderDetails = {
-      restaurantId: '123',
-      items: [
-        { foodId: '456', quantity: 2 },
-      ],
-      address: 'Calle 123, Ciudad ABC',
-    };
-    const response = await placeOrder(orderDetails);
-    console.log('Pedido realizado:', response);
-  } catch (error) {
-    console.error('Error al realizar el pedido:', error);
-  }
-}
-orderFood();
-3. Dejar una Reseña de Comida
-Los usuarios pueden calificar alimentos y escribir reseñas.
-
-typescript
-Copy code
-import { submitReview } from './services/ReviewService';
-
-async function leaveReview() {
-  try {
-    const review = {
-      foodId: '456',
-      rating: 5,
-      comment: '¡Delicioso, muy recomendado!',
-    };
-    const response = await submitReview(review);
-    console.log('Reseña enviada:', response);
-  } catch (error) {
-    console.error('Error al enviar la reseña:', error);
-  }
-}
-leaveReview();
-Estructura del Proyecto
-plaintext
-Copy code
 ├── src/
 │   ├── services/
 │   │   ├── GeminiApiServiceHelper.ts  // Servicio para la API de Gemini
